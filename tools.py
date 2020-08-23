@@ -6,6 +6,10 @@ import pickle
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import time
+import re
+
+PROFILE_URL = re.compile("<?http://gewaltig.net/ProfileView.aspx?([0-9]+).*")
+PROFILE_ID = re.compile(".*([0-9]+).*")
 
 def get_online_players():
     """
@@ -93,8 +97,33 @@ def player_stats_by_name(player_name, df):
     return False
 
 def player_stats_by_id(player_id, df):
-
     return df.loc[df['UserId'] == player_id]
+
+def player_query(arg):
+    # load saved dataframe here
+    df = pd.read_pickle("Player_Dump")
+
+    # first check if we've got a profile url on our hands
+    if "http://gewaltig.net/ProfileView.aspx" in arg:
+        match = PROFILE_URL.match(arg)
+        if match:
+            userid = match.group(1)
+            return player_stats_by_id(userid, df)
+        else:
+            return False
+
+    # try looking up the user by name
+    player = player_stats_by_name(arg, df)
+    if player:
+        return player
+
+    # try seeing if the input argument has a number to look up by id again
+    match = PROFILE_ID.match(arg)
+    if match:
+        userid = match.group(1)
+        return player_stats_by_id(userid, df)
+    return False
+
 
 if __name__ == "__main__":
 

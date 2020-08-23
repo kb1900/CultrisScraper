@@ -19,19 +19,18 @@ async def on_ready():
 
 
 @bot.command(name='stats', help='look up a users cultris stats!')
-async def stats(ctx, player_name: str):
-    ### Load saved df and pass it to function below
-    df = pd.read_pickle("Player_Dump")
-    info = player_stats_by_name(player_name, df)
+async def stats(ctx, *, query: player_query):
+    if not query:
+        await ctx.send("The query returned no result :(")
 
-    embedVar = discord.Embed(title=info[0]['Name'], color=0x11806a)
-    embedVar.add_field(name="Rank", value=info[0]['Rank'], inline=True)
-    embedVar.add_field(name="Score", value=str(round(info[0]['Score'],1)), inline=True)
-    embedVar.add_field(name="Max Combo", value=info[0]['MaxCombo'], inline=True)
+    embedVar = discord.Embed(title=query[0]['Name'], color=0x11806a)
+    embedVar.add_field(name="Rank", value=query[0]['Rank'], inline=True)
+    embedVar.add_field(name="Score", value=str(round(query[0]['Score'],1)), inline=True)
+    embedVar.add_field(name="Max Combo", value=query[0]['MaxCombo'], inline=True)
 
-    embedVar.add_field(name="Total Hours", value=str(round(int(info[0]['Playedmin'])/60, 1)), inline=True)
-    embedVar.add_field(name="Total Games", value=info[0]['PlayedRounds'], inline=True)
-    embedVar.add_field(name="Wins", value=info[0]['Wins'], inline=True)
+    embedVar.add_field(name="Total Hours", value=str(round(int(query[0]['Playedmin'])/60, 1)), inline=True)
+    embedVar.add_field(name="Total Games", value=query[0]['PlayedRounds'], inline=True)
+    embedVar.add_field(name="Wins", value=query[0]['Wins'], inline=True)
 
     embedVar.add_field(name="Peak Rank", value="Coming soon!", inline=True)
     embedVar.add_field(name="Hours (last 7 days)", value="Coming soon!", inline=True)
@@ -41,7 +40,6 @@ async def stats(ctx, player_name: str):
 @bot.command(name='online', help='check out whose online!')
 async def stats(ctx):
     ### Load saved df and pass it to function below
-    df = pd.read_pickle("Player_Dump")
     info = show_online_players()
     ffa = ', '.join(info[0])
     rookie = ', '.join(info[1])
