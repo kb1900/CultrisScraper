@@ -8,8 +8,8 @@ from fuzzywuzzy import process
 import time
 import re
 
-PROFILE_URL = re.compile("<?http://gewaltig.net/ProfileView.aspx?([0-9]+).*")
-PROFILE_ID = re.compile(".*([0-9]+).*")
+PROFILE_URL = re.compile("<?http:\/\/gewaltig\.net\/ProfileView\.aspx\?userid=([0-9]+).*")
+PROFILE_ID = re.compile(".*?([0-9]+).*")
 
 def get_online_players():
     """
@@ -90,14 +90,18 @@ def player_stats_by_name(player_name, df):
 
     for row in df.index:
         rowName = df.loc[row, "Name"]
-        if fuzz.token_set_ratio(rowName, player_name.lower()) > 60:
+        if fuzz.token_set_ratio(rowName, player_name.lower()) > 95:
             x = df.loc[df['Name'] == rowName]
+            print(x.to_dict('records'))
             return x.to_dict('records')
 
     return False
 
 def player_stats_by_id(player_id, df):
-    return df.loc[df['UserId'] == player_id]
+
+    x = df.loc[df['UserId'] == int(player_id)]
+    print(x.to_dict('records'))
+    return x.to_dict('records')
 
 def player_query(arg):
     # load saved dataframe here
@@ -152,4 +156,4 @@ if __name__ == "__main__":
     # df = scrape_leaderboard()
     # df = pd.read_pickle("Player_Dump")
     # print(player_stats_by_name(player_name='null', df=df))
-    # print(player_stats_by_id(1, df))
+    # print(player_stats_by_id(8802, df))

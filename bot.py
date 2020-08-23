@@ -22,20 +22,20 @@ async def on_ready():
 async def stats(ctx, *, query: player_query):
     if not query:
         await ctx.send("The query returned no result :(")
+    else:
+        embedVar = discord.Embed(title=query[0]['Name'], color=0x11806a)
+        embedVar.add_field(name="Rank", value=query[0]['Rank'], inline=True)
+        embedVar.add_field(name="Score", value=str(round(query[0]['Score'],1)), inline=True)
+        embedVar.add_field(name="Max Combo", value=query[0]['MaxCombo'], inline=True)
 
-    embedVar = discord.Embed(title=query[0]['Name'], color=0x11806a)
-    embedVar.add_field(name="Rank", value=query[0]['Rank'], inline=True)
-    embedVar.add_field(name="Score", value=str(round(query[0]['Score'],1)), inline=True)
-    embedVar.add_field(name="Max Combo", value=query[0]['MaxCombo'], inline=True)
+        embedVar.add_field(name="Total Hours", value=str(round(int(query[0]['Playedmin'])/60, 1)), inline=True)
+        embedVar.add_field(name="Total Games", value=query[0]['PlayedRounds'], inline=True)
+        embedVar.add_field(name="Wins", value=query[0]['Wins'], inline=True)
 
-    embedVar.add_field(name="Total Hours", value=str(round(int(query[0]['Playedmin'])/60, 1)), inline=True)
-    embedVar.add_field(name="Total Games", value=query[0]['PlayedRounds'], inline=True)
-    embedVar.add_field(name="Wins", value=query[0]['Wins'], inline=True)
+        embedVar.add_field(name="Peak Rank", value="Coming soon!", inline=True)
+        embedVar.add_field(name="Hours (last 7 days)", value="Coming soon!", inline=True)
 
-    embedVar.add_field(name="Peak Rank", value="Coming soon!", inline=True)
-    embedVar.add_field(name="Hours (last 7 days)", value="Coming soon!", inline=True)
-
-    await ctx.send(embed=embedVar)
+        await ctx.send(embed=embedVar)
 
 @bot.command(name='online', help='check out whose online!')
 async def stats(ctx):
