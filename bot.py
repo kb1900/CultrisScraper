@@ -21,7 +21,7 @@ async def on_ready():
 @bot.command(name='stats', help='look up a users cultris stats!')
 async def stats(ctx, *, query: player_query=None):
     if query == None:
-        query = player_query(ctx.message.author.nick)
+        query = player_query(ctx.message.author.nick or ctx.message.author.name)
 
     if not query:
         await ctx.send("The query returned no result :(")
