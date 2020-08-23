@@ -15,12 +15,10 @@ def get_online_players():
     """
     Returns list of players where each player is a dict
     """
-
     url = "http://gewaltig.net/liveinfo.aspx"
     response = requests.get(url)
     players = response.json()['players']
     # rooms = response.json()['rooms']
-
     return players
 
 def show_online_players():
@@ -28,13 +26,13 @@ def show_online_players():
     Returns list of players where each player is a formatted string of "name (status)"
     """
     online = get_online_players()
-    ffa_players = [x['name'] for x in online if x['afk'] != True and x['challenge'] == "" and x['room'] == 0]
-    rookie_players = [x['name'] for x in online if x['afk'] != True and x['challenge'] == "" and x['room'] == 1]
-    cheese_players = [x['name'] for x in online if x['afk'] != True and x['challenge'] == "" and x['room'] == 2]
-    non_ffa_players = [x['name'] for x in online if x['afk'] != True and x['challenge'] == "" and x['room'] not in [0,1,2]]
-    team_players = [x['name'] + ' ('+ x['team'] + ')' for x in online if x['afk'] != True and x['team'] != False]
-    challenge_players = [x['name'] + ' ('+ x['challenge'] + ')' for x in online if x['challenge'] != ""]
-    afk_players = [x['name'] for x in online if x['afk'] == True]
+    ffa_players = [x['name'] for x in online if not x['afk'] and not x['challenge'] and x['room'] == 0]
+    rookie_players = [x['name'] for x in online if not x['afk'] and not x['challenge'] and x['room'] == 1]
+    cheese_players = [x['name'] for x in online if not x['afk'] and not x['challenge'] and x['room'] == 2]
+    non_ffa_players = [x['name'] for x in online if not x['afk'] and not x['challenge'] and x['room'] not in [0,1,2]]
+    team_players = [x['name'] + ' ('+ x['team'] + ')' for x in online if not x['afk'] and x['team']]
+    challenge_players = [x['name'] + ' ('+ x['challenge'] + ')' for x in online if x['challenge']]
+    afk_players = [x['name'] for x in online if x['afk']]
 
     players = ffa_players + rookie_players + cheese_players + challenge_players + afk_players + team_players
     for i in players:
@@ -77,7 +75,6 @@ def scrape_leaderboard():
     '''
     Utilizes an endpoint to get all player data and returns as a dataframe
     '''
-
     url = 'http://gewaltig.net/WebStats.aspx?getall=true'
     response = requests.get(url)
     players = response.json()
@@ -87,18 +84,15 @@ def scrape_leaderboard():
     return df
 
 def player_stats_by_name(player_name, df):
-
     for row in df.index:
         rowName = df.loc[row, "Name"]
         if fuzz.token_set_ratio(rowName, player_name.lower()) > 95:
             x = df.loc[df['Name'] == rowName]
             print(x.to_dict('records'))
             return x.to_dict('records')
-
     return False
 
 def player_stats_by_id(player_id, df):
-
     x = df.loc[df['UserId'] == int(player_id)]
     print(x.to_dict('records'))
     return x.to_dict('records')
@@ -115,12 +109,10 @@ def player_query(arg):
             return player_stats_by_id(userid, df)
         else:
             return False
-
     # try looking up the user by name
     player = player_stats_by_name(arg, df)
     if player:
         return player
-
     # try seeing if the input argument has a number to look up by id again
     match = PROFILE_ID.match(arg)
     if match:
@@ -128,20 +120,19 @@ def player_query(arg):
         return player_stats_by_id(userid, df)
     return False
 
-def rankings_query(start=1, end=20):
+def rankings_query(page=1):
     # load saved dataframe here
     df = pd.read_pickle("Player_Dump")
-
     # get a truncated database, sorted by rank, (?converted to dict)
-    return df.sort_values(by=["Rank"], ascending=True).truncate(before=start-1, after=end-1).to_dict("records")
+    return df.sort_values(by=["Rank"], ascending=True).truncate(before=~-page*20-1, after=page*20-1).to_dict("records")
 
+def player_url(player):
+    return f"http://gewaltig.net/ProfileView.aspx?userid={player['UserId']}"
 
 if __name__ == "__main__":
-
     # IDEA: Once a day or so, scrape the leaderboard, append the new DF to a dict with date stamp
     # Use the date stamps to get minutes played over past 7 days
     # Use the date stamps to get net score over past 7 days
-
 
     starttime = time.time()
     while True:
