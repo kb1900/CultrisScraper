@@ -27,7 +27,7 @@ async def stats(ctx, *, query: player_query=None):
         await ctx.send("The query returned no result :(")
         return
     else:
-        embedVar = discord.Embed(title=query[0]['Name'], color=0x11806a)
+        embedVar = discord.Embed(title=query[0]['Name'], color=0x11806a, url=f"http://gewaltig.net/ProfileView.aspx?userid={query[0]['UserId']}")
         embedVar.add_field(name="Rank", value=query[0]['Rank'], inline=True)
         embedVar.add_field(name="Score", value=str(round(query[0]['Score'],1)), inline=True)
         embedVar.add_field(name="Max Combo", value=query[0]['MaxCombo'], inline=True)
