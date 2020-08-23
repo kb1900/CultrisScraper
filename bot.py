@@ -18,7 +18,7 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
 
-@bot.command(name='stats', help='look up a users cultris stats!')
+@bot.command(name='stats', aliases=['rank', 'stat'], help='Look up a players Cultris stats by username, user id, or profile url!')
 async def stats(ctx, *, query: player_query=None):
     if query == None:
         query = player_query(ctx.message.author.nick or ctx.message.author.name)
@@ -41,7 +41,7 @@ async def stats(ctx, *, query: player_query=None):
 
         await ctx.send(embed=embedVar)
 
-@bot.command(name='rankings', help='Check out the top players!')
+@bot.command(name='rankings', aliases=['ranks', 'leaderboard'], help='Display a page of the leaderboard', usage="")
 async def rankings(ctx, page=1):
 
 
@@ -57,7 +57,7 @@ async def rankings(ctx, page=1):
 
     await ctx.send(embed=embedVar)
 
-@bot.command(name='online', help='check out whose online!')
+@bot.command(name='online', aliases=['active', 'ffa'], help='See who is currently online right now!!')
 async def online(ctx):
     ### Load saved df and pass it to function below
     info = show_online_players()
