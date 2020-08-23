@@ -3,7 +3,10 @@ import discord
 import os
 from discord.ext import commands
 from lookup import Lookup
+from dotenv import load_dotenv
 
+
+load_dotenv()
 bot = commands.Bot(command_prefix='!')
 
 @bot.event
@@ -20,4 +23,4 @@ async def on_error(event, *args, **kwargs):
 
 bot.add_cog(Lookup(bot))
 
-bot.run('MjQzODQwNzA2MDc2OTk5Njgw.WBukWg.B1fzwDLzru6oEFbN88gZeSBO9dQ')
+bot.run(os.getenv('DISCORD_TOKEN'))
