@@ -41,8 +41,22 @@ async def stats(ctx, *, query: player_query=None):
 
         await ctx.send(embed=embedVar)
 
+@bot.command(name='rankings', help='Check out the top players!')
+async def rankings(ctx):
+    player_dict = rankings_query()
+
+    description = ""
+    for i in player_dict:
+        player_url = f"http://gewaltig.net/ProfileView.aspx?userid={i['UserId']}"
+        description += str(i['Rank']) + ".  " + "[" + i['Name'] + "]" + ("(" + player_url + ")")+ "  (" + str(round(i['Score'], 2)) + ")" + "\n"
+        print(i['Name'], round(i['Score'], 2))
+
+    embedVar = discord.Embed(title="Rankings", color=0x11806a, url="https://gewaltig.net/stats.aspx", description=description)
+
+    await ctx.send(embed=embedVar)
+
 @bot.command(name='online', help='check out whose online!')
-async def stats(ctx):
+async def online(ctx):
     ### Load saved df and pass it to function below
     info = show_online_players()
     ffa = ', '.join(info[0])

@@ -128,12 +128,20 @@ def player_query(arg):
         return player_stats_by_id(userid, df)
     return False
 
+def rankings_query(arg=20):
+    # load saved dataframe here
+    df = pd.read_pickle("Player_Dump")
+
+    # get a truncated database, sorted by rank, (?converted to dict)
+    return df.sort_values(by=["Rank"], ascending=True).truncate(after=arg-1).to_dict("records")
+
 
 if __name__ == "__main__":
 
     # IDEA: Once a day or so, scrape the leaderboard, append the new DF to a dict with date stamp
     # Use the date stamps to get minutes played over past 7 days
     # Use the date stamps to get net score over past 7 days
+
 
     starttime = time.time()
     while True:
@@ -153,7 +161,6 @@ if __name__ == "__main__":
 
     # TELL ME ABUOT PLAYER ____
     # NOTE: probably dont call scrape_leaderboard too often, just load the most recent one and pass it
-    # df = scrape_leaderboard()
     # df = pd.read_pickle("Player_Dump")
     # print(player_stats_by_name(player_name='null', df=df))
     # print(player_stats_by_id(8802, df))
