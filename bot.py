@@ -42,8 +42,10 @@ async def stats(ctx, *, query: player_query=None):
         await ctx.send(embed=embedVar)
 
 @bot.command(name='rankings', help='Check out the top players!')
-async def rankings(ctx):
-    player_dict = rankings_query()
+async def rankings(ctx, page=1):
+
+
+    player_dict = rankings_query(~-page*20, page*20)
 
     description = ""
     for i in player_dict:

@@ -128,12 +128,12 @@ def player_query(arg):
         return player_stats_by_id(userid, df)
     return False
 
-def rankings_query(arg=20):
+def rankings_query(start=1, end=20):
     # load saved dataframe here
     df = pd.read_pickle("Player_Dump")
 
     # get a truncated database, sorted by rank, (?converted to dict)
-    return df.sort_values(by=["Rank"], ascending=True).truncate(after=arg-1).to_dict("records")
+    return df.sort_values(by=["Rank"], ascending=True).truncate(before=start-1, after=end-1).to_dict("records")
 
 
 if __name__ == "__main__":
