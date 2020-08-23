@@ -9,7 +9,7 @@ class Lookup(commands.Cog):
     @commands.command(name='stats', aliases=['rank', 'stat'], help='Look up a players Cultris stats by username, user id, or profile url!')
     async def stats(self, ctx, *, query: tools.player_query=None):
         if query == None:
-            query = player_query(ctx.message.author.nick or ctx.message.author.name)
+            query = tools.player_query(ctx.message.author.nick or ctx.message.author.name)
 
         if not query:
             await ctx.send("The query returned no result :(")
