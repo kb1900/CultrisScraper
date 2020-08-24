@@ -17,20 +17,28 @@ class Lookup(commands.Cog):
 
         player = query[0]
 
-        embed = discord.Embed(title=player['Name'], color=0x11806a, url=tools.player_url(query[0]))
-        embed.add_field(name="Rank", value=player['Rank'], inline=True)
-        embed.add_field(name="Score", value=f"{player['Score']:.1f}", inline=True)
-        embed.add_field(name="Max Combo", value=player['MaxCombo'], inline=True)
-        embed.add_field(name="Total Hours", value=f"{player['Playedmin']/60:.1f}", inline=True)
-        embed.add_field(name="Total Games", value=player['PlayedRounds'], inline=True)
-        embed.add_field(name="Wins", value=player['Wins'], inline=True)
+        # TODO: minutes played in last 7 days using player_DB
+        # recent_hours = tools.get_recent_hours(query[0]['UserId'])
+        # TODO: change win rate to past 14 days
 
-        embed.add_field(name="Peak Rank", value="Coming soon!", inline=True)
-        embed.add_field(name="Hours (last 7 days)", value="Coming soon!", inline=True)
+        peak_rank = tools.get_peak(query[0]['UserId'])
+        if not peak_rank:
+            peak_rank = "Coming soon!"
+
+        embed = discord.Embed(title=player['Name'], color=0x11806a, url=tools.player_url(query[0]))
+        embed.add_field(name="Current Rank", value=player['Rank'], inline=True)
+        embed.add_field(name="Score", value=f"{player['Score']:.1f}", inline=True)
+        embed.add_field(name="Best Combo", value=player['MaxCombo'], inline=True)
+        embed.add_field(name="Peak Rank", value=peak_rank, inline=True)
+        embed.add_field(name="Wins", value=player['Wins'], inline=True)
+        embed.add_field(name="Win Rate", value=str(round((player['Wins']/player['PlayedRounds'] * 100),1))+ "%", inline=True)
+        embed.add_field(name="Total Games", value=player['PlayedRounds'], inline=True)
+        embed.add_field(name="Total Hours", value=f"{player['Playedmin']/60:.1f}", inline=True)
+        embed.add_field(name="Last 7 Days", value="Coming soon!", inline=True)
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='rankings', aliases=['ranks', 'leaderboard'], help='Display a page of the leaderboard', usage="")
+    @commands.command(name='rankings', aliases=['ranks', 'leaderboard', 'ranking'], help='Display a page of the leaderboard', usage="")
     async def rankings(self, ctx, page=1):
         player_dict = tools.rankings_query(page)
         description = ""

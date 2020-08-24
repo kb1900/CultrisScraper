@@ -2,7 +2,7 @@ import json
 import requests
 import pandas as pd
 from datetime import datetime
-import pickle
+import pickle, dill
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import time
@@ -70,6 +70,44 @@ def get_player_data_by_id(player_id):
     # print(player_stats)
     return player_stats
 
+def update_playerDB():
+    '''
+    Goal is to have a player_DB with every userID (as this is static, unlike usernames)
+    Then each time a new player_dump is created, we append that user's stats as a dict where the key is a time stamp
+    Dump the dict as player_DB
+    '''
+
+    # Get a fresh player_dump and userID list
+    now = datetime.now()
+    scrape_leaderboard()
+
+    player_list = []
+    current_dump = pd.read_pickle("Player_Dump").to_dict("records")
+    for player in current_dump:
+        player_list.append(player["UserId"])
+
+    # Load the player_DB if it exists, otherwise create an empty dict
+    try:
+        with open('player_DB', 'rb') as f:
+            player_DB = dill.load(f)
+    except FileNotFoundError:
+        print("player_DB pickle dump not found, initializing a new database as an empty dict")
+        player_DB = {}
+
+    # Add {timestamp: stats} to the userid's value, so we end up with userid: {timestamp, stats}, {timestamp, stats}, {timestamp, stats}
+    # Catch Keyerrors which are cases where the userID (new users) is not already in playerDB
+    for userID in player_list:
+        try:
+            player_DB[userID].update({now.strftime("%d/%m/%Y %H:%M"): next(item for item in current_dump if item["UserId"] == userID)})
+        except KeyError:
+            print(userID, "does not exist!, Creating a new entry")
+            player_DB[userID] = {now.strftime("%d/%m/%Y %H:%M"): next(item for item in current_dump if item["UserId"] == userID)}
+
+    # Save the player_DB
+    with open('player_DB', 'wb') as f:
+        dill.dump(player_DB, f)
+
+    return player_DB
 
 def scrape_leaderboard():
     '''
@@ -82,6 +120,24 @@ def scrape_leaderboard():
     df = pd.DataFrame(players)
     df.to_pickle("Player_Dump")
     return df
+
+def get_peak(player_id):
+    # Using player_DB, calculate a userID's peak rank
+
+    # Load the player_DB if it exists, otherwise return False
+    try:
+        with open('player_DB', 'rb') as f:
+            player_DB = dill.load(f)
+    except FileNotFoundError:
+        return False
+
+    playerData = player_DB[player_id]
+    ranks = []
+    for timestamp, value in playerData.items():
+        ranks.append(value['Rank'])
+    print("All ranks for user id", player_id, ranks)
+    return min(ranks)
+
 
 def player_stats_by_name(player_name, df):
     for row in df.index:
@@ -123,7 +179,7 @@ def player_query(arg):
 def rankings_query(page=1):
     # load saved dataframe here
     df = pd.read_pickle("Player_Dump")
-    # get a truncated database, sorted by rank, (?converted to dict)
+    # get a truncated database, sorted by rank, converted to dict
     return df.sort_values(by=["Rank"], ascending=True).truncate(before=~-page*20-1, after=page*20-1).to_dict("records")
 
 def player_url(player):
@@ -137,8 +193,8 @@ if __name__ == "__main__":
     starttime = time.time()
     while True:
         now = datetime.now()
-        print("Updating Leaderboard!", now.strftime("%d/%m/%Y %H:%M:%S"))
-        scrape_leaderboard()
+        print("Updating Player_Dump and player_DB!", now.strftime("%d/%m/%Y %H:%M"))
+        update_playerDB()
         print("Done!")
         time.sleep(600.0 - ((time.time() - starttime) % 600.0))
 
