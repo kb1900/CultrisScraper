@@ -183,17 +183,15 @@ def get_week_playtime(player_id):
     # Load the player_DB if it exists, otherwise return False
     try:
         with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            player_DB = json.load(fp)
+            playerData = json.load(fp)[str(player_id)]
     except FileNotFoundError:
         return False
-
-    playerData = player_DB[str(player_id)]
 
     times = []
     for timestamp, value in playerData.items():
         times.append((timestamp, value["Playedmin"]))
 
-    print("All Playedmin for user id", player_id, times)
+    # print("All Playedmin for user id", player_id, times)
 
     # Filter tuples in times where the time stamp is between today and 7 days ago
     today = datetime.today()
@@ -218,15 +216,14 @@ def get_peak(player_id):
     # Load the player_DB if it exists, otherwise return False
     try:
         with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            player_DB = json.load(fp)
+            playerData = json.load(fp)[str(player_id)]
     except FileNotFoundError:
         return False
 
-    playerData = player_DB[str(player_id)]
     ranks = []
     for timestamp, value in playerData.items():
         ranks.append(value["Rank"])
-    print("All ranks for user id", player_id, ranks)
+    # print("All ranks for user id", player_id, ranks)
     return min(ranks)
 
 
@@ -297,7 +294,7 @@ if __name__ == "__main__":
         print("Done!")
         time.sleep(
             600.0 - ((time.time() - starttime) % 600.0)
-        )  # pulling q10 minutes, need to be weary of file sizes
+        )  # pulling q10 minutes, need to be weary of file sizes, memory usage
 
     # SHOW ME THE DATA!
     # df = scrape_leaderboard()
