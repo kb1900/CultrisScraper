@@ -24,11 +24,11 @@ class Lookup(commands.Cog):
 
         player = query[0]
 
-        # TODO: minutes played in last 7 days using player_DB
-        # recent_hours = tools.get_recent_hours(query[0]['UserId'])
         # TODO: change win rate to past 14 days using player_DB
         # TODO: NET score over last 7 days using player_DB
 
+        recent_mins = 0
+        recent_mins = tools.get_week_playtime(query[0]["UserId"])
         peak_rank = False
         peak_rank = tools.get_peak(query[0]["UserId"])
         if not peak_rank:
@@ -37,21 +37,29 @@ class Lookup(commands.Cog):
         embed = discord.Embed(
             title=player["Name"], color=0x11806A, url=tools.player_url(query[0])
         )
-        embed.add_field(name="Current Rank", value=player["Rank"], inline=True)
+        embed.add_field(name="Rank", value=player["Rank"], inline=True)
         embed.add_field(name="Score", value=f"{player['Score']:.1f}", inline=True)
+        embed.add_field(name="Peak", value=peak_rank, inline=True)
         embed.add_field(name="Best Combo", value=player["MaxCombo"], inline=True)
-        embed.add_field(name="Peak Rank", value=peak_rank, inline=True)
+        embed.add_field(
+            name="Max BPM", value=round(player["MAXRoundBpm"], 1), inline=True
+        )
+        embed.add_field(
+            name="Avg BPM", value=round(player["AVGRoundBpm"], 1), inline=True
+        )
+        embed.add_field(name="Games", value=player["PlayedRounds"], inline=True)
         embed.add_field(name="Wins", value=player["Wins"], inline=True)
         embed.add_field(
             name="Win Rate",
             value=str(round((player["Wins"] / player["PlayedRounds"] * 100), 1)) + "%",
             inline=True,
         )
-        embed.add_field(name="Total Games", value=player["PlayedRounds"], inline=True)
         embed.add_field(
             name="Total Hours", value=f"{player['Playedmin']/60:.1f}", inline=True
         )
-        embed.add_field(name="Last 7 Days", value="Coming soon!", inline=True)
+        embed.add_field(
+            name="Last 7 Days", value=str(recent_mins) + " mins", inline=True
+        )
 
         await ctx.send(embed=embed)
 
@@ -90,7 +98,9 @@ class Lookup(commands.Cog):
         team = ", ".join(info[4])
         afk = ", ".join(info[-1])
 
-        embedVar = discord.Embed(title="Players Online", color=0x11806A)
+        embedVar = discord.Embed(
+            title="Players Online", color=0x11806A, url="https://gewaltig.net/"
+        )
         if len(ffa):
             embedVar.add_field(name="FFA", value=ffa, inline=True)
         if len(rookie):

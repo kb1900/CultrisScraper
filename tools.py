@@ -1,7 +1,7 @@
 import json, gzip
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import pickle  # TODO: switch to json for data out and in
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
@@ -121,13 +121,14 @@ def update_playerDB():
     now = datetime.now()
     scrape_leaderboard()
 
+    # TODO: only populate player_list with those who are online most of the time to reduce resources
+    # TODO: then do the full player_dump list once a day to ensure parity
     player_list = []
     current_dump = pd.read_pickle("Player_Dump").to_dict("records")
     for player in current_dump:
         player_list.append(str(player["UserId"]))
 
     # Load the player_DB if it exists, otherwise create an empty dict
-    # TODO: switch to json for data out and in
     try:
         with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
             player_DB = json.load(fp)
@@ -174,6 +175,41 @@ def scrape_leaderboard():
     df = pd.DataFrame(players)
     df.to_pickle("Player_Dump")
     return df
+
+
+def get_week_playtime(player_id):
+    # Using player_DB, calculate a userID's play time over the last week
+
+    # Load the player_DB if it exists, otherwise return False
+    try:
+        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
+            player_DB = json.load(fp)
+    except FileNotFoundError:
+        return False
+
+    playerData = player_DB[str(player_id)]
+
+    times = []
+    for timestamp, value in playerData.items():
+        times.append((timestamp, value["Playedmin"]))
+
+    print("All Playedmin for user id", player_id, times)
+
+    # Filter tuples in times where the time stamp is between today and 7 days ago
+    today = datetime.today()
+    week_ago = today - timedelta(days=7)
+    week_times = []
+    for tuple in times:
+        # print(datetime.strptime(tuple[0], "%d/%m/%Y %H:%M"))
+        if (
+            datetime.strptime(tuple[0], "%d/%m/%Y %H:%M") > week_ago
+        ):  # append playedMin from the last week
+            week_times.append(tuple[1])
+
+    if len(week_times) > 0:
+        return round(max(week_times) - min(week_times), 1)
+    else:
+        return 0
 
 
 def get_peak(player_id):
