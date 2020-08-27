@@ -177,28 +177,19 @@ def scrape_leaderboard():
     return df
 
 
-def get_week_playtime(player_id):
-    # Using player_DB, calculate a userID's play time over the last week
-
-    # Load the player_DB if it exists, otherwise return False
-    try:
-        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            playerData = json.load(fp)[str(player_id)]
-    except FileNotFoundError:
-        return False
+def get_week_playtime(playerData):
+    # Using playerData from player_DB, calculate a userID's play time over the last week
 
     times = []
     for timestamp, value in playerData.items():
         times.append((timestamp, value["Playedmin"]))
 
     # print("All Playedmin for user id", player_id, times)
-
     # Filter tuples in times where the time stamp is between today and 7 days ago
     today = datetime.today()
     week_ago = today - timedelta(days=7)
     week_times = []
     for tuple in times:
-        # print(datetime.strptime(tuple[0], "%d/%m/%Y %H:%M"))
         if (
             datetime.strptime(tuple[0], "%d/%m/%Y %H:%M") > week_ago
         ):  # append playedMin from the last week
@@ -210,21 +201,29 @@ def get_week_playtime(player_id):
         return 0
 
 
-def get_peak(player_id):
-    # Using player_DB, calculate a userID's peak rank
-
-    # Load the player_DB if it exists, otherwise return False
-    try:
-        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            playerData = json.load(fp)[str(player_id)]
-    except FileNotFoundError:
-        return False
-
+def get_peak(playerData):
+    # Using playerData from player_DB, calculate a userID's peak rank
     ranks = []
     for timestamp, value in playerData.items():
         ranks.append(value["Rank"])
     # print("All ranks for user id", player_id, ranks)
     return min(ranks)
+
+
+def player_extra_stats_by_id(player_id):
+    extra_stats = {}
+    extra_stats["Peak"] = False
+    extra_stats["RecentPlayedmin"] = 0
+
+    try:
+        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
+            playerData = json.load(fp)[str(player_id)]
+            extra_stats["Peak"] = get_peak(playerData)
+            extra_stats["RecentPlayedmin"] = get_week_playtime(playerData)
+    except FileNotFoundError:
+        return extra_stats
+
+    return extra_stats
 
 
 def player_stats_by_name(player_name, df):

@@ -27,10 +27,9 @@ class Lookup(commands.Cog):
         # TODO: change win rate to past 14 days using player_DB
         # TODO: NET score over last 7 days using player_DB
 
-        recent_mins = 0
-        recent_mins = tools.get_week_playtime(query[0]["UserId"])
-        peak_rank = False
-        peak_rank = tools.get_peak(query[0]["UserId"])
+        extra_stats = tools.player_extra_stats_by_id(query[0]["UserId"])
+        recent_mins = extra_stats["RecentPlayedmin"]
+        peak_rank = extra_stats["Peak"]
         if not peak_rank:
             peak_rank = "Coming soon!"
 
