@@ -1,8 +1,8 @@
-import json
+import json, gzip
 import requests
 import pandas as pd
 from datetime import datetime
-import pickle, dill  # TODO: switch to json for data out and in
+import pickle  # TODO: switch to json for data out and in
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import time
@@ -124,16 +124,16 @@ def update_playerDB():
     player_list = []
     current_dump = pd.read_pickle("Player_Dump").to_dict("records")
     for player in current_dump:
-        player_list.append(player["UserId"])
+        player_list.append(str(player["UserId"]))
 
     # Load the player_DB if it exists, otherwise create an empty dict
     # TODO: switch to json for data out and in
     try:
-        with open("player_DB", "rb") as f:
-            player_DB = dill.load(f)
+        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
+            player_DB = json.load(fp)
     except FileNotFoundError:
         print(
-            "player_DB pickle dump not found, initializing a new database as an empty dict"
+            "player_DB.json dump not found, initializing a new database as an empty dict"
         )
         player_DB = {}
 
@@ -144,7 +144,7 @@ def update_playerDB():
             player_DB[userID].update(
                 {
                     now.strftime("%d/%m/%Y %H:%M"): next(
-                        item for item in current_dump if item["UserId"] == userID
+                        item for item in current_dump if item["UserId"] == int(userID)
                     )
                 }
             )
@@ -152,15 +152,14 @@ def update_playerDB():
             print(userID, "does not exist!, Creating a new entry")
             player_DB[userID] = {
                 now.strftime("%d/%m/%Y %H:%M"): next(
-                    item for item in current_dump if item["UserId"] == userID
+                    item for item in current_dump if item["UserId"] == int(userID)
                 )
             }
 
     # Save the player_DB
     # TODO: switch to json for data out and in
-    with open("player_DB", "wb") as f:
-        dill.dump(player_DB, f)
-
+    with gzip.open("player_DB.json", "wt", encoding="utf-8") as fp:
+        json.dump(player_DB, fp)
     return player_DB
 
 
@@ -182,12 +181,12 @@ def get_peak(player_id):
 
     # Load the player_DB if it exists, otherwise return False
     try:
-        with open("player_DB", "rb") as f:
-            player_DB = dill.load(f)
+        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
+            player_DB = json.load(fp)
     except FileNotFoundError:
         return False
 
-    playerData = player_DB[player_id]
+    playerData = player_DB[str(player_id)]
     ranks = []
     for timestamp, value in playerData.items():
         ranks.append(value["Rank"])
@@ -255,7 +254,9 @@ if __name__ == "__main__":
     starttime = time.time()
     while True:
         now = datetime.now()
-        print("Updating Player_Dump and player_DB!", now.strftime("%d/%m/%Y %H:%M"))
+        print(
+            "Updating Player_Dump and player_DB.json!", now.strftime("%d/%m/%Y %H:%M")
+        )
         update_playerDB()
         print("Done!")
         time.sleep(

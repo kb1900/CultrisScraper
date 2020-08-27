@@ -4,3 +4,4 @@ Player_Dump
 *.pyc
 .DS_Store
 player_DB
+player_DB.json
