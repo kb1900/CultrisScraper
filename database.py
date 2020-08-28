@@ -166,8 +166,8 @@ def calculate_month_winrate(stats):
 
 
 if __name__ == "__main__":
-    # conn = create_connection("playerDB.db")
-    # update_DB(conn)
+    conn = create_connection("playerDB.db")
+    update_DB(conn)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
         if now.minute % 60 == 0:  # pulling q60 minutes
             print("Updating playerDB.db", now.strftime("%d/%m/%Y %H:%M"))
-            update_DB()
+            update_DB(conn)
             print("Done!")
 
         time.sleep(60)
