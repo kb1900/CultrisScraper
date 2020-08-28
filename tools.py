@@ -118,9 +118,6 @@ def update_playerDB():
     """
 
     # Get a fresh player_dump and userID list
-    now = datetime.now()
-    scrape_leaderboard()
-
     # TODO: only populate player_list with those who are online most of the time to reduce resources
     # TODO: then do the full player_dump list once a day to ensure parity
     player_list = []
@@ -140,6 +137,7 @@ def update_playerDB():
 
     # Add {timestamp: stats} to the userid's value, so we end up with userid: {timestamp, stats}, {timestamp, stats}, {timestamp, stats}
     # Catch Keyerrors which are cases where the userID (new users) is not already in playerDB
+    now = datetime.now()
     for userID in player_list:
         try:
             player_DB[userID].update(
@@ -218,10 +216,11 @@ def player_extra_stats_by_id(player_id):
     try:
         with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
             playerData = json.load(fp)[str(player_id)]
-            extra_stats["Peak"] = get_peak(playerData)
-            extra_stats["RecentPlayedmin"] = get_week_playtime(playerData)
     except FileNotFoundError:
         return extra_stats
+
+    extra_stats["Peak"] = get_peak(playerData)
+    extra_stats["RecentPlayedmin"] = get_week_playtime(playerData)
 
     return extra_stats
 
@@ -286,15 +285,19 @@ if __name__ == "__main__":
     starttime = time.time()
     while True:
         now = datetime.now()
-        print(
-            "Updating Player_Dump and player_DB.json!", now.strftime("%d/%m/%Y %H:%M")
-        )
-        update_playerDB()
-        print("Done!")
-        time.sleep(
-            600.0 - ((time.time() - starttime) % 600.0)
-        )  # pulling q10 minutes, need to be weary of file sizes, memory usage
+        print("It is:", now.strftime("%d/%m/%Y %H:%M"))
 
+        if now.minute % 10 == 0:  # pulling q10 minutes
+            print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
+            scrape_leaderboard()
+            print("Done!")
+
+        if now.minute % 60 == 0:  # pulling q60 minutes
+            print("Updating player_DB.json", now.strftime("%d/%m/%Y %H:%M"))
+            update_playerDB()
+            print("Done!")
+
+        time.sleep(60)
     # SHOW ME THE DATA!
     # df = scrape_leaderboard()
     # pd.set_option('display.max_columns', None)
