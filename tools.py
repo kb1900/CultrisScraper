@@ -110,58 +110,6 @@ def get_player_data_by_id(player_id):
     return player_stats
 
 
-def update_playerDB():
-    """
-    Goal is to have a player_DB with every userID (as this is static, unlike usernames)
-    Then each time a new player_dump is created, we append that user's stats as a dict where the key is a time stamp
-    Dump the dict as player_DB
-    """
-
-    # Get a fresh player_dump and userID list
-    # TODO: only populate player_list with those who are online most of the time to reduce resources
-    # TODO: then do the full player_dump list once a day to ensure parity
-    player_list = []
-    current_dump = pd.read_pickle("Player_Dump").to_dict("records")
-    for player in current_dump:
-        player_list.append(str(player["UserId"]))
-
-    # Load the player_DB if it exists, otherwise create an empty dict
-    try:
-        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            player_DB = json.load(fp)
-    except FileNotFoundError:
-        print(
-            "player_DB.json dump not found, initializing a new database as an empty dict"
-        )
-        player_DB = {}
-
-    # Add {timestamp: stats} to the userid's value, so we end up with userid: {timestamp, stats}, {timestamp, stats}, {timestamp, stats}
-    # Catch Keyerrors which are cases where the userID (new users) is not already in playerDB
-    now = datetime.now()
-    for userID in player_list:
-        try:
-            player_DB[userID].update(
-                {
-                    now.strftime("%d/%m/%Y %H:%M"): next(
-                        item for item in current_dump if item["UserId"] == int(userID)
-                    )
-                }
-            )
-        except KeyError:
-            print(userID, "does not exist!, Creating a new entry")
-            player_DB[userID] = {
-                now.strftime("%d/%m/%Y %H:%M"): next(
-                    item for item in current_dump if item["UserId"] == int(userID)
-                )
-            }
-
-    # Save the player_DB
-    # TODO: switch to json for data out and in
-    with gzip.open("player_DB.json", "wt", encoding="utf-8") as fp:
-        json.dump(player_DB, fp)
-    return player_DB
-
-
 def scrape_leaderboard():
     """
     Utilizes an endpoint to get all player data and returns as a dataframe
@@ -173,56 +121,6 @@ def scrape_leaderboard():
     df = pd.DataFrame(players)
     df.to_pickle("Player_Dump")
     return df
-
-
-def get_week_playtime(playerData):
-    # Using playerData from player_DB, calculate a userID's play time over the last week
-
-    times = []
-    for timestamp, value in playerData.items():
-        times.append((timestamp, value["Playedmin"]))
-
-    # print("All Playedmin for user id", player_id, times)
-    # Filter tuples in times where the time stamp is between today and 7 days ago
-    today = datetime.today()
-    week_ago = today - timedelta(days=7)
-    week_times = []
-    for tuple in times:
-        if (
-            datetime.strptime(tuple[0], "%d/%m/%Y %H:%M") > week_ago
-        ):  # append playedMin from the last week
-            week_times.append(tuple[1])
-
-    if len(week_times) > 0:
-        return round(max(week_times) - min(week_times), 1)
-    else:
-        return 0
-
-
-def get_peak(playerData):
-    # Using playerData from player_DB, calculate a userID's peak rank
-    ranks = []
-    for timestamp, value in playerData.items():
-        ranks.append(value["Rank"])
-    # print("All ranks for user id", player_id, ranks)
-    return min(ranks)
-
-
-def player_extra_stats_by_id(player_id):
-    extra_stats = {}
-    extra_stats["Peak"] = False
-    extra_stats["RecentPlayedmin"] = 0
-
-    try:
-        with gzip.open("player_DB.json", "rt", encoding="utf-8") as fp:
-            playerData = json.load(fp)[str(player_id)]
-    except FileNotFoundError:
-        return extra_stats
-
-    extra_stats["Peak"] = get_peak(playerData)
-    extra_stats["RecentPlayedmin"] = get_week_playtime(playerData)
-
-    return extra_stats
 
 
 def player_stats_by_name(player_name, df):
@@ -282,22 +180,7 @@ def player_url(player):
 
 if __name__ == "__main__":
 
-    starttime = time.time()
-    while True:
-        now = datetime.now()
-        print("It is:", now.strftime("%d/%m/%Y %H:%M"))
-
-        if now.minute % 10 == 0:  # pulling q10 minutes
-            print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
-            scrape_leaderboard()
-            print("Done!")
-
-        if now.minute % 60 == 0:  # pulling q60 minutes
-            print("Updating player_DB.json", now.strftime("%d/%m/%Y %H:%M"))
-            update_playerDB()
-            print("Done!")
-
-        time.sleep(60)
+    print("tools.py")
     # SHOW ME THE DATA!
     # df = scrape_leaderboard()
     # pd.set_option('display.max_columns', None)

@@ -1,5 +1,5 @@
 import discord
-import tools
+import tools, database
 from discord.ext import commands
 
 
@@ -26,10 +26,16 @@ class Lookup(commands.Cog):
 
         # TODO: change win rate to past 14 days using player_DB
         # TODO: NET score over last 7 days using player_DB
-
-        extra_stats = tools.player_extra_stats_by_id(query[0]["UserId"])
-        recent_mins = extra_stats["RecentPlayedmin"]
-        peak_rank = extra_stats["Peak"]
+        peak_rank = database.calculate_peak(
+            database.select_player_by_id(
+                database.create_connection("playerDB.db"), query[0]["UserId"]
+            )
+        )
+        recent_mins = database.calculate_week_playtime(
+            database.select_player_by_id(
+                database.create_connection("playerDB.db"), query[0]["UserId"]
+            )
+        )
         if not peak_rank:
             peak_rank = "Coming soon!"
 
