@@ -36,6 +36,17 @@ class Lookup(commands.Cog):
                 database.create_connection("playerDB.db"), query[0]["UserId"]
             )
         )
+        net_score = database.calcualte_week_net_score(
+            database.select_player_by_id(
+                database.create_connection("playerDB.db"), query[0]["UserId"]
+            )
+        )
+        month_win_rate = database.calculate_month_winrate(
+            database.select_player_by_id(
+                database.create_connection("playerDB.db"), query[0]["UserId"]
+            )
+        )
+
         if not peak_rank:
             peak_rank = "Coming soon!"
 
@@ -46,18 +57,16 @@ class Lookup(commands.Cog):
         embed.add_field(name="Score", value=f"{player['Score']:.1f}", inline=True)
         embed.add_field(name="Peak", value=peak_rank, inline=True)
         embed.add_field(name="Best Combo", value=player["MaxCombo"], inline=True)
+        embed.add_field(name="Games", value=player["PlayedRounds"], inline=True)
+        embed.add_field(name="Wins", value=player["Wins"], inline=True)
+        embed.add_field(
+            name="Win Rate (30d)", value=str(month_win_rate) + "%", inline=True,
+        )
         embed.add_field(
             name="Max BPM", value=round(player["MAXRoundBpm"], 1), inline=True
         )
         embed.add_field(
             name="Avg BPM", value=round(player["AVGRoundBpm"], 1), inline=True
-        )
-        embed.add_field(name="Games", value=player["PlayedRounds"], inline=True)
-        embed.add_field(name="Wins", value=player["Wins"], inline=True)
-        embed.add_field(
-            name="Win Rate",
-            value=str(round((player["Wins"] / player["PlayedRounds"] * 100), 1)) + "%",
-            inline=True,
         )
         embed.add_field(
             name="Total Hours", value=f"{player['Playedmin']/60:.1f}", inline=True
@@ -65,6 +74,7 @@ class Lookup(commands.Cog):
         embed.add_field(
             name="Last 7 Days", value=str(recent_mins) + " mins", inline=True
         )
+        embed.add_field(name="Net Score", value=str(net_score), inline=True)
 
         await ctx.send(embed=embed)
 

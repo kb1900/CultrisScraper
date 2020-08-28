@@ -93,6 +93,7 @@ def to_dict(rows):
         "playedrounds",
         "playedmin",
         "score",
+        "wins",
     ]
     stats = []
     for tuple in rows:
@@ -124,12 +125,53 @@ def calculate_week_playtime(stats):
         return 0
 
 
+def calcualte_week_net_score(stats):
+    today = datetime.today()
+    week_ago = today - timedelta(days=7)
+
+    scores = [
+        element["score"]
+        for element in stats
+        if datetime.strptime(element["timestamp"], "%d/%m/%Y %H:%M") > week_ago
+    ]
+
+    if len(scores) > 0:
+        return round(scores[-1] - scores[0], 1)
+    else:
+        return 0
+
+
+def calculate_month_winrate(stats):
+    today = datetime.today()
+    month_ago = today - timedelta(days=30)
+
+    month_wins = [
+        element["wins"]
+        for element in stats
+        if datetime.strptime(element["timestamp"], "%d/%m/%Y %H:%M") > month_ago
+    ]
+
+    month_rounds = [
+        element["playedrounds"]
+        for element in stats
+        if datetime.strptime(element["timestamp"], "%d/%m/%Y %H:%M") > month_ago
+    ]
+
+    wins = max(month_wins) - min(month_wins)
+    rounds = max(month_rounds) - min(month_rounds)
+    if rounds != 0:
+        return round(wins / rounds * 100, 1)
+    else:
+        return 0
+
+
 if __name__ == "__main__":
     # conn = create_connection("playerDB.db")
-    # # update_DB(conn)
+    # update_DB(conn)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
-    #
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
+    # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
+    # print(calcualte_week_net_score(select_player_by_name(conn, "Azteca")))
 
     while True:
         now = datetime.now()
