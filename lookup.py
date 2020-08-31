@@ -114,14 +114,12 @@ class Lookup(commands.Cog):
         end = start + 20
         r = start + 1
         for i in player_dict[start:end]:
-            description += (
-                f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']:.1f})\n"
-            )
+            description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.1f})\n"
             print(f"{i['Name']} {i['WeekPlaytime']:.1f}")
             r += 1
         await ctx.send(
             embed=discord.Embed(
-                title="Most Active Players (minutes over last 7d)",
+                title="Most Active Players (hours over last 7d)",
                 color=0x11806A,
                 url="https://gewaltig.net/",
                 description=description,

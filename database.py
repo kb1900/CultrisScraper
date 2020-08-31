@@ -172,11 +172,6 @@ def calculate_month_winrate(stats):
 
 
 def calculate_active(conn):
-    player_list = []
-    current_dump = pd.read_pickle("Player_Dump").to_dict("records")
-    for player in current_dump:
-        player_list.append(str(player["UserId"]))
-
     c = conn.cursor()
     c.execute(
         "SELECT MAX(timestamp), userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
@@ -211,7 +206,9 @@ if __name__ == "__main__":
             tools.scrape_leaderboard()
             print("Done!")
 
-        if now.minute % 60 == 0:  # pulling q60 minutes
+        if (
+            now.minute % 60 == 0
+        ):  # pulling q60 minutes, update_DB takes almost 30 minutes
             print("Updating playerDB.db", now.strftime("%d/%m/%Y %H:%M"))
             update_DB(conn)
             print("Done!")
