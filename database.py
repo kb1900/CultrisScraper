@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
 import time
+from progressbar import progressbar
 
 
 def create_connection(db_file):
@@ -17,21 +18,24 @@ def create_connection(db_file):
 
 def update_DB(conn):
     c = conn.cursor()
-    # c.execute("CREATE TABLE stats (userID INTEGER, name TEXT, timestamp TEXT, rank INTEGER, AvgBPM FLOAT, MaxBPM FLOAT, MaxCombo INTEGER, PlayedRounds INTEGER, PlayedMin FLOAT, Score FLOAT, Wins INTEGER)")
-
-    # tools.scrape_leaderboard()
+    # c.execute("CREATE TABLE stats (userID INTEGER, name TEXT, timestamp TEXT, rank INTEGER, AvgBPM FLOAT, MaxBPM FLOAT, MaxCombo INTEGER, PlayedRounds INTEGER, PlayedMin FLOAT, Score FLOAT, Wins INTEGER, WeekPlaytime FLOAT)")
+    # c.execute("ALTER TABLE stats ADD COLUMN WeekPlaytime FLOAT")
+    tools.scrape_leaderboard()
     player_list = []
     current_dump = pd.read_pickle("Player_Dump").to_dict("records")
     for player in current_dump:
         player_list.append(str(player["UserId"]))
 
     now = datetime.now()
-    for userID in player_list:
+
+    for userID in progressbar(player_list):
         player_data = next(
             item for item in current_dump if item["UserId"] == int(userID)
         )
+        week = calculate_week_playtime(select_player_by_id(conn, int(userID)))
+
         c.execute(
-            "INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 player_data["UserId"],
                 player_data["Name"],
@@ -44,6 +48,7 @@ def update_DB(conn):
                 player_data["Playedmin"],
                 player_data["Score"],
                 player_data["Wins"],
+                week,
             ),
         )
 
@@ -94,6 +99,7 @@ def to_dict(rows):
         "playedmin",
         "score",
         "wins",
+        "WeekPlaytime",
     ]
     stats = []
     for tuple in rows:
@@ -163,6 +169,29 @@ def calculate_month_winrate(stats):
         return round(wins / rounds * 100, 1)
     else:
         return 0
+
+
+def calculate_active(conn):
+    player_list = []
+    current_dump = pd.read_pickle("Player_Dump").to_dict("records")
+    for player in current_dump:
+        player_list.append(str(player["UserId"]))
+
+    c = conn.cursor()
+    c.execute(
+        "SELECT MAX(timestamp), userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
+        ("None",),
+    )
+    rows = c.fetchall()
+
+    active = sorted(rows, key=lambda i: i[-1], reverse=True)
+    keys = ["timestamp", "UserId", "Name", "WeekPlaytime"]
+
+    active_dict = []
+    for tuple in active:
+        active_dict.append(dict(zip(keys, tuple)))
+
+    return active_dict
 
 
 if __name__ == "__main__":
