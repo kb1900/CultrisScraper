@@ -188,6 +188,7 @@ if __name__ == "__main__":
             print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
             tools.scrape_leaderboard()
             print("Done!")
+        time.sleep(60)
     # SHOW ME THE DATA!
     # df = scrape_leaderboard()
     # pd.set_option('display.max_columns', None)
