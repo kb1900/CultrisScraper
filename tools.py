@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
         if now.minute % 5 == 0:  # pulling q5 minutes
             print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
-            tools.scrape_leaderboard()
+            scrape_leaderboard()
             print("Done!")
         time.sleep(60)
     # SHOW ME THE DATA!
