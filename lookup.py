@@ -101,7 +101,7 @@ class Lookup(commands.Cog):
 
     @commands.command(
         name="active",
-        aliases=["playtimes"],
+        aliases=["playtimes", "playtime"],
         help="Display a page of the 1 week activity leaderboard",
         usage="",
     )
@@ -114,12 +114,41 @@ class Lookup(commands.Cog):
         end = start + 20
         r = start + 1
         for i in player_dict[start:end]:
-            description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.1f})\n"
-            print(f"{i['Name']} {i['WeekPlaytime']:.1f}")
+            description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.2f})\n"
+            print(f"{i['Name']} {i['WeekPlaytime']/60:.2f}")
             r += 1
         await ctx.send(
             embed=discord.Embed(
                 title="Most Active Players (hours over last 7d)",
+                color=0x11806A,
+                url="https://gewaltig.net/",
+                description=description,
+            )
+        )
+
+    @commands.command(
+        name="scores",
+        aliases=["score", "netscores"],
+        help="Display a page of the 1 net score leaderboard",
+        usage="",
+    )
+    async def active(self, ctx, page=1):
+        player_dict = database.calculate_net_scores(
+            database.create_connection("playerDB.db")
+        )
+        description = ""
+        start = 20 * (page - 1)
+        end = start + 20
+        r = start + 1
+        for i in player_dict[start:end]:
+            description += (
+                f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['NetScore']:.1f})\n"
+            )
+            print(f"{i['Name']} {i['NetScore']:.1f}")
+            r += 1
+        await ctx.send(
+            embed=discord.Embed(
+                title="Net Scores Leaderboard (over last 7d)",
                 color=0x11806A,
                 url="https://gewaltig.net/",
                 description=description,
