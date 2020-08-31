@@ -33,8 +33,11 @@ def update_DB(conn):
         player_data = next(
             item for item in current_dump if item["UserId"] == int(userID)
         )
-        week = calculate_week_playtime(select_player_by_id(conn, int(userID)))
-        netscore = calcualte_week_net_score(select_player_by_id(conn, int(userID)))
+        if player_data["Rank"] < 1000:
+            week = calculate_week_playtime(select_player_by_id(conn, int(userID)))
+            netscore = calcualte_week_net_score(select_player_by_id(conn, int(userID)))
+        else:
+            week, netscore = 0.0, 0.0
 
         c.execute(
             "INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -224,7 +227,7 @@ if __name__ == "__main__":
         print("It is:", now.strftime("%d/%m/%Y %H:%M"))
         if (
             now.minute % 60 == 0
-        ):  # pulling q60 minutes, update_DB takes almost 45+ minutes
+        ):  # pulling q60 minutes, update_DB takes almost 25+ minutes
             print("Updating playerDB.db", now.strftime("%d/%m/%Y %H:%M"))
             update_DB(conn)
             print("Done!")
