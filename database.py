@@ -216,7 +216,7 @@ def calculate_net_scores(conn):
 
 if __name__ == "__main__":
     conn = create_connection("playerDB.db")
-    update_DB(conn)
+    # update_DB(conn)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))

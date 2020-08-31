@@ -132,7 +132,7 @@ class Lookup(commands.Cog):
         help="Display a page of the 1 net score leaderboard",
         usage="",
     )
-    async def active(self, ctx, page=1):
+    async def scores(self, ctx, page=1):
         player_dict = database.calculate_net_scores(
             database.create_connection("playerDB.db")
         )
