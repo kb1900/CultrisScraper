@@ -180,7 +180,14 @@ def player_url(player):
 
 if __name__ == "__main__":
 
-    print("tools.py")
+    while True:
+        now = datetime.now()
+        print("It is:", now.strftime("%d/%m/%Y %H:%M"))
+
+        if now.minute % 5 == 0:  # pulling q5 minutes
+            print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
+            tools.scrape_leaderboard()
+            print("Done!")
     # SHOW ME THE DATA!
     # df = scrape_leaderboard()
     # pd.set_option('display.max_columns', None)

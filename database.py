@@ -222,15 +222,9 @@ if __name__ == "__main__":
     while True:
         now = datetime.now()
         print("It is:", now.strftime("%d/%m/%Y %H:%M"))
-
-        if now.minute % 5 == 0:  # pulling q5 minutes
-            print("Updating Player_Dump", now.strftime("%d/%m/%Y %H:%M"))
-            tools.scrape_leaderboard()
-            print("Done!")
-
         if (
             now.minute % 60 == 0
-        ):  # pulling q60 minutes, update_DB takes almost 30 minutes
+        ):  # pulling q60 minutes, update_DB takes almost 45+ minutes
             print("Updating playerDB.db", now.strftime("%d/%m/%Y %H:%M"))
             update_DB(conn)
             print("Done!")
