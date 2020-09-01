@@ -180,22 +180,14 @@ def calculate_month_winrate(stats):
 
 def calculate_active(conn):
     c = conn.cursor()
-    now = "%" + datetime.now().strftime("%d/%m/%Y") + "%"
-    # c.execute(
-    #     "SELECT MAXtimestamp, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? AND timestamp = ? GROUP BY userID",
-    #     ("None", datetime.now().strftime("%d/%m/%Y"),),
-    # )
     c.execute(
-        "SELECT timestamp, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? AND timestamp LIKE ? GROUP BY userID",
-        ("None", now,),
+        "SELECT MAX(datetime(substr(timestamp, 7, 4) || '-' || substr(timestamp, 4, 2) || '-' || substr(timestamp, 1, 2) || substr(timestamp, 12, 5))), userID, name, WeekPlaytime FROM stats GROUP BY userID ORDER BY WeekPlaytime DESC",
     )
     rows = c.fetchall()
-    active = sorted(rows, key=lambda i: i[-1], reverse=True)
 
     keys = ["timestamp", "UserId", "Name", "WeekPlaytime"]
-
     active_dict = []
-    for tuple in active:
+    for tuple in rows:
         active_dict.append(dict(zip(keys, tuple)))
 
     return active_dict
@@ -203,22 +195,14 @@ def calculate_active(conn):
 
 def calculate_net_scores(conn):
     c = conn.cursor()
-    now = "%" + datetime.now().strftime("%d/%m/%Y") + "%"
-    # c.execute(
-    #     "SELECT ?, userID, name, NetScore FROM stats WHERE NetScore != ? GROUP BY userID",
-    #     (datetime.now().strftime("%d/%m/%Y %H:%M"), 0.0,),
-    # )
     c.execute(
-        "SELECT timestamp, userID, name, NetScore FROM stats WHERE NetScore != ? AND timestamp LIKE ? GROUP BY userID",
-        (0.0, now,),
+        "SELECT MAX(datetime(substr(timestamp, 7, 4) || '-' || substr(timestamp, 4, 2) || '-' || substr(timestamp, 1, 2) || substr(timestamp, 12, 5))), userID, name, NetScore FROM stats GROUP BY userID ORDER BY NetScore DESC",
     )
     rows = c.fetchall()
 
-    net_scores = sorted(rows, key=lambda i: i[-1], reverse=True)
     keys = ["timestamp", "UserId", "Name", "NetScore"]
-
     net_scores_dict = []
-    for tuple in net_scores:
+    for tuple in rows:
         net_scores_dict.append(dict(zip(keys, tuple)))
 
     return net_scores_dict
@@ -226,14 +210,14 @@ def calculate_net_scores(conn):
 
 if __name__ == "__main__":
     conn = create_connection("playerDB.db")
-    # update_DB(conn)
-    active = calculate_active(conn)[0:20]
-    for i in active:
-        print(i)
-    print("\n")
-    net_scores = calculate_net_scores(conn)[0:20]
-    for i in net_scores:
-        print(i)
+    update_DB(conn)
+    # active = calculate_active(conn)[0:20]
+    # for i in active:
+    #     print(i)
+    # print("\n")
+    # net_scores = calculate_net_scores(conn)[0:20]
+    # for i in net_scores:
+    #     print(i)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
