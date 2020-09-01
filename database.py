@@ -21,7 +21,7 @@ def update_DB(conn):
     # c.execute("CREATE TABLE stats (userID INTEGER, name TEXT, timestamp TEXT, rank INTEGER, AvgBPM FLOAT, MaxBPM FLOAT, MaxCombo INTEGER, PlayedRounds INTEGER, PlayedMin FLOAT, Score FLOAT, Wins INTEGER, WeekPlaytime FLOAT, NetScore FLOAT)")
     # c.execute("ALTER TABLE stats ADD COLUMN WeekPlaytime FLOAT")
     # c.execute("ALTER TABLE stats ADD COLUMN NetScore FLOAT")
-    # tools.scrape_leaderboard()
+    tools.scrape_leaderboard()
     player_list = []
     current_dump = pd.read_pickle("Player_Dump").to_dict("records")
     for player in current_dump:
