@@ -128,7 +128,7 @@ class Lookup(commands.Cog):
 
     @commands.command(
         name="scores",
-        aliases=["score", "netscores"],
+        aliases=["score", "netscores", "netscore"],
         help="Display a page of the 1 net score leaderboard",
         usage="",
     )
