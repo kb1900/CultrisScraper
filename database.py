@@ -180,13 +180,18 @@ def calculate_month_winrate(stats):
 
 def calculate_active(conn):
     c = conn.cursor()
+    now = "%" + datetime.now().strftime("%d/%m/%Y") + "%"
+    # c.execute(
+    #     "SELECT MAXtimestamp, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? AND timestamp = ? GROUP BY userID",
+    #     ("None", datetime.now().strftime("%d/%m/%Y"),),
+    # )
     c.execute(
-        "SELECT ?, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
-        (datetime.now().strftime("%d/%m/%Y %H:%M"), "None",),
+        "SELECT timestamp, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? AND timestamp LIKE ? GROUP BY userID",
+        ("None", now,),
     )
     rows = c.fetchall()
-
     active = sorted(rows, key=lambda i: i[-1], reverse=True)
+
     keys = ["timestamp", "UserId", "Name", "WeekPlaytime"]
 
     active_dict = []
@@ -198,9 +203,14 @@ def calculate_active(conn):
 
 def calculate_net_scores(conn):
     c = conn.cursor()
+    now = "%" + datetime.now().strftime("%d/%m/%Y") + "%"
+    # c.execute(
+    #     "SELECT ?, userID, name, NetScore FROM stats WHERE NetScore != ? GROUP BY userID",
+    #     (datetime.now().strftime("%d/%m/%Y %H:%M"), 0.0,),
+    # )
     c.execute(
-        "SELECT ?, userID, name, NetScore FROM stats WHERE NetScore != ? GROUP BY userID",
-        (datetime.now().strftime("%d/%m/%Y %H:%M"), 0.0,),
+        "SELECT timestamp, userID, name, NetScore FROM stats WHERE NetScore != ? AND timestamp LIKE ? GROUP BY userID",
+        (0.0, now,),
     )
     rows = c.fetchall()
 
@@ -216,13 +226,14 @@ def calculate_net_scores(conn):
 
 if __name__ == "__main__":
     conn = create_connection("playerDB.db")
-    update_DB(conn)
-    # active = calculate_active(conn)[0:20]
-    # for i in active:
-    #     print(i)
-    # net_scores = calculate_net_scores(conn)[0:20]
-    # for i in net_scores:
-    #     print(i)
+    # update_DB(conn)
+    active = calculate_active(conn)[0:20]
+    for i in active:
+        print(i)
+    print("\n")
+    net_scores = calculate_net_scores(conn)[0:20]
+    for i in net_scores:
+        print(i)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))

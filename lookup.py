@@ -115,7 +115,7 @@ class Lookup(commands.Cog):
         r = start + 1
         for i in player_dict[start:end]:
             description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.2f})\n"
-            print(f"{i['Name']} {i['WeekPlaytime']/60:.2f}")
+            print(i)
             r += 1
         await ctx.send(
             embed=discord.Embed(
