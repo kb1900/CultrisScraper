@@ -181,8 +181,8 @@ def calculate_month_winrate(stats):
 def calculate_active(conn):
     c = conn.cursor()
     c.execute(
-        "SELECT MAX(timestamp), userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
-        ("None",),
+        "SELECT ?, userID, name, WeekPlaytime FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
+        (datetime.now().strftime("%d/%m/%Y %H:%M"), "None",),
     )
     rows = c.fetchall()
 
@@ -199,8 +199,8 @@ def calculate_active(conn):
 def calculate_net_scores(conn):
     c = conn.cursor()
     c.execute(
-        "SELECT MAX(timestamp), userID, name, NetScore FROM stats WHERE WeekPlaytime != ? GROUP BY userID",
-        (0.0,),
+        "SELECT ?, userID, name, NetScore FROM stats WHERE NetScore != ? GROUP BY userID",
+        (datetime.now().strftime("%d/%m/%Y %H:%M"), 0.0,),
     )
     rows = c.fetchall()
 
@@ -217,6 +217,12 @@ def calculate_net_scores(conn):
 if __name__ == "__main__":
     conn = create_connection("playerDB.db")
     update_DB(conn)
+    # active = calculate_active(conn)[0:20]
+    # for i in active:
+    #     print(i)
+    # net_scores = calculate_net_scores(conn)[0:20]
+    # for i in net_scores:
+    #     print(i)
     # calculate_peak(select_player_by_name(conn, "z2sam"))
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
