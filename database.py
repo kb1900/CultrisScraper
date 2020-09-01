@@ -227,9 +227,11 @@ if __name__ == "__main__":
         now = datetime.now()
         print("It is:", now.strftime("%d/%m/%Y %H:%M"))
         if (
-            now.minute % 60 == 0
-        ):  # pulling q60 minutes, update_DB takes almost 25+ minutes
-            print("Updating playerDB.db", now.strftime("%d/%m/%Y %H:%M"))
+            now.minute % 10 == 0
+        ):  # pulling q10 minutes, update_DB takes 8-10 minutes now with filtering of rank < 1000
+            print(
+                "Updating Player_Dump and playerDB.db", now.strftime("%d/%m/%Y %H:%M")
+            )
             update_DB(conn)
             print("Done!")
 

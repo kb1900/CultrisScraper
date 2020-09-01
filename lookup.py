@@ -94,7 +94,7 @@ class Lookup(commands.Cog):
             embed=discord.Embed(
                 title="Rankings",
                 color=0x11806A,
-                url="https://gewaltig.net/stats.aspx",
+                url=f"https://gewaltig.net/stats.aspx?sort=rank&page={page}",
                 description=description,
             )
         )
