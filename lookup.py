@@ -114,12 +114,15 @@ class Lookup(commands.Cog):
         end = start + 20
         r = start + 1
         for i in player_dict[start:end]:
-            description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.2f})\n"
+            hours = i["WeekPlaytime"] / 60
+            minutes = i["WeekPlaytime"] % 60
+            # description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.2f} hrs)\n"
+            description += f"{r}. [{i['Name']}]({tools.player_url(i)})  {hours:.0f}h {minutes:.0f}m \n"
             print(i)
             r += 1
         await ctx.send(
             embed=discord.Embed(
-                title="Most Active Players (hours over last 7d)",
+                title="Most Active Players (last 7d)",
                 color=0x11806A,
                 url="https://gewaltig.net/",
                 description=description,
@@ -129,26 +132,35 @@ class Lookup(commands.Cog):
     @commands.command(
         name="scores",
         aliases=["score", "netscores", "netscore"],
-        help="Display a page of the 1 net score leaderboard",
+        help="Display a page of the net score leaderboard",
         usage="",
     )
     async def scores(self, ctx, page=1):
         player_dict = database.calculate_net_scores(
             database.create_connection("playerDB.db")
         )
+        title = "Best Net Scores (over last 7d)"
+        if page < 0:
+            # reverse the dict
+            page = page * -1
+            player_dict = sorted(
+                player_dict, key=lambda i: i["NetScore"], reverse=False
+            )
+            title = "Worst Net Scores (over last 7d)"
+
         description = ""
         start = 20 * (page - 1)
         end = start + 20
         r = start + 1
         for i in player_dict[start:end]:
             description += (
-                f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['NetScore']:.1f})\n"
+                f"{r}. [{i['Name']}]({tools.player_url(i)}) {i['NetScore']:+.1f}\n"
             )
             print(f"{i['Name']} {i['NetScore']:.1f}")
             r += 1
         await ctx.send(
             embed=discord.Embed(
-                title="Net Scores Leaderboard (over last 7d)",
+                title=title,
                 color=0x11806A,
                 url="https://gewaltig.net/",
                 description=description,

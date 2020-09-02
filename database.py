@@ -196,7 +196,8 @@ def calculate_active(conn):
 def calculate_net_scores(conn):
     c = conn.cursor()
     c.execute(
-        "SELECT MAX(datetime(substr(timestamp, 7, 4) || '-' || substr(timestamp, 4, 2) || '-' || substr(timestamp, 1, 2) || substr(timestamp, 12, 5))), userID, name, NetScore FROM stats GROUP BY userID ORDER BY NetScore DESC",
+        "SELECT MAX(datetime(substr(timestamp, 7, 4) || '-' || substr(timestamp, 4, 2) || '-' || substr(timestamp, 1, 2) || substr(timestamp, 12, 5))), userID, name, NetScore FROM stats WHERE NetScore != ? GROUP BY userID ORDER BY NetScore DESC",
+        (0.0,),
     )
     rows = c.fetchall()
 
