@@ -233,7 +233,11 @@ if __name__ == "__main__":
             print(
                 "Updating Player_Dump and playerDB.db", now.strftime("%d/%m/%Y %H:%M")
             )
-            update_DB(conn)
-            print("Done!")
+            try:
+                update_DB(conn)
+                print("Done with sucess!")
+            except Exception as e:
+                print(e)
+                print("Done with failure!")
 
         time.sleep(60)
