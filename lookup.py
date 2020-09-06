@@ -114,11 +114,11 @@ class Lookup(commands.Cog):
         end = start + 20
         r = start + 1
         for i in player_dict[start:end]:
-            hours = i["WeekPlaytime"] / 60
+            hours = i["WeekPlaytime"] // 60
             minutes = i["WeekPlaytime"] % 60
             # description += f"{r}. [{i['Name']}]({tools.player_url(i)}) ({i['WeekPlaytime']/60:.2f} hrs)\n"
             description += f"{r}. [{i['Name']}]({tools.player_url(i)})  {hours:.0f}h {minutes:.0f}m \n"
-            print(i)
+            print(i, hours, minutes)
             r += 1
         await ctx.send(
             embed=discord.Embed(
