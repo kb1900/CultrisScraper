@@ -33,7 +33,7 @@ def update_DB(conn):
         player_data = next(
             item for item in current_dump if item["UserId"] == int(userID)
         )
-        if player_data["Rank"] < 1000:
+        if player_data["Rank"] < 600:
             week = calculate_week_playtime(select_player_by_id(conn, int(userID)))
             netscore = calcualte_week_net_score(select_player_by_id(conn, int(userID)))
         else:
@@ -58,7 +58,7 @@ def update_DB(conn):
             ),
         )
 
-        conn.commit()
+    conn.commit()
 
 
 def select_player_by_id(conn, userID):
@@ -210,8 +210,7 @@ def calculate_net_scores(conn):
 
 
 if __name__ == "__main__":
-    conn = create_connection("playerDB.db")
-    update_DB(conn)
+    update_DB(create_connection("playerDB.db"))
     # active = calculate_active(conn)[0:20]
     # for i in active:
     #     print(i)
@@ -234,7 +233,7 @@ if __name__ == "__main__":
                 "Updating Player_Dump and playerDB.db", now.strftime("%d/%m/%Y %H:%M")
             )
             try:
-                update_DB(conn)
+                update_DB(create_connection("playerDB.db"))
                 print("Done with sucess!")
             except Exception as e:
                 print(e)

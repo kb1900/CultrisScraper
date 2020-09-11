@@ -26,19 +26,14 @@ class Lookup(commands.Cog):
 
         # TODO: change win rate to past 14 days using player_DB
         # TODO: NET score over last 7 days using player_DB
-        conn = database.create_connection("playerDB.db")
-        peak_rank = database.calculate_peak(
-            database.select_player_by_id(conn, query[0]["UserId"])
+        stats = database.select_player_by_id(
+            database.create_connection("playerDB.db"), query[0]["UserId"]
         )
-        recent_mins = database.calculate_week_playtime(
-            database.select_player_by_id(conn, query[0]["UserId"])
-        )
-        net_score = database.calcualte_week_net_score(
-            database.select_player_by_id(conn, query[0]["UserId"])
-        )
-        month_win_rate = database.calculate_month_winrate(
-            database.select_player_by_id(conn, query[0]["UserId"])
-        )
+
+        peak_rank = database.calculate_peak(stats)
+        recent_mins = database.calculate_week_playtime(stats)
+        net_score = database.calcualte_week_net_score(stats)
+        month_win_rate = database.calculate_month_winrate(stats)
 
         if not peak_rank:
             peak_rank = "Coming soon!"
