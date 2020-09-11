@@ -34,8 +34,9 @@ def update_DB(conn):
             item for item in current_dump if item["UserId"] == int(userID)
         )
         if player_data["Rank"] < 600:
-            week = calculate_week_playtime(select_player_by_id(conn, int(userID)))
-            netscore = calcualte_week_net_score(select_player_by_id(conn, int(userID)))
+            stats = select_player_by_id(conn, int(userID))
+            week = calculate_week_playtime(stats)
+            netscore = calcualte_week_net_score(stats)
         else:
             week, netscore = 0.0, 0.0
 
