@@ -210,6 +210,37 @@ def calculate_net_scores(conn):
     return net_scores_dict
 
 
+def select_daily_stats_by_id(id, conn):
+    c = conn.cursor()
+    c.execute(
+        "SELECT datetime(substr(timestamp, 7, 4) || '-' || substr(timestamp, 4, 2) || '-' || substr(timestamp, 1, 2) || substr(timestamp, 12, 5)) as 'date', * FROM stats WHERE userID = ? GROUP BY userID, strftime('%d', date) ORDER BY date ASC",
+        (id,),
+    )
+
+    rows = c.fetchall()
+    keys = [
+        "date",
+        "userID",
+        "name",
+        "timestamp",
+        "rank",
+        "avgbpm",
+        "maxbpm",
+        "maxcombo",
+        "playedrounds",
+        "playedmin",
+        "score",
+        "wins",
+        "WeekPlaytime",
+        "netscore",
+    ]
+    stats = []
+    for tuple in rows:
+        stats.append(dict(zip(keys, tuple)))
+
+    return stats
+
+
 if __name__ == "__main__":
     update_DB(create_connection("playerDB.db"))
     # active = calculate_active(conn)[0:20]
@@ -223,6 +254,7 @@ if __name__ == "__main__":
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
     # print(calcualte_week_net_score(select_player_by_name(conn, "Azteca")))
+    # data = select_daily_stats_by_id(17218, create_connection("playerDB.db"))
 
     while True:
         now = datetime.now()
