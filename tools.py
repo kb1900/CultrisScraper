@@ -133,6 +133,16 @@ def player_stats_by_name(player_name, df):
     return False
 
 
+def player_stats_by_name_fuzzy(player_name, df):
+    for row in df.index:
+        rowName = df.loc[row, "Name"]
+        if fuzz.token_set_ratio(rowName, player_name.lower()) > 80:
+            x = df.loc[df["Name"] == rowName]
+            print(x.to_dict("records"))
+            return x.to_dict("records")
+    return False
+
+
 def player_stats_by_id(player_id, df):
     x = df.loc[df["UserId"] == int(player_id)]
     print(x.to_dict("records"))

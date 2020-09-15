@@ -96,4 +96,7 @@ def netscores_rankings():
 def userid_by_name(username):
     df = pd.read_pickle("Player_Dump")
     player_dict = tools.player_stats_by_name(username, df)
+
+    if not player_dict:
+        player_dict = tools.player_stats_by_name_fuzzy(username, df)
     return json.dumps(player_dict)
