@@ -101,3 +101,11 @@ def userid_by_name(username):
     if not player_dict:
         player_dict = tools.player_stats_by_name_fuzzy(username, df)
     return json.dumps(player_dict)
+
+
+if __name__ == "__main__":
+    context = (
+        "/etc/letsencrypt/live/cultris.net/fullchain.pem",
+        "/etc/letsencrypt/live/cultris.net/privkey.pem",
+    )  # certificate and key files
+    app.run(host="0.0.0.0", port="5000", debug=True, ssl_context=context)
