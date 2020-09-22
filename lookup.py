@@ -38,8 +38,13 @@ class Lookup(commands.Cog):
         if not peak_rank:
             peak_rank = "Coming soon!"
 
+        # embed = discord.Embed(
+        #     title=player["Name"], color=0x11806A, url=tools.player_url(query[0])
+        # )
         embed = discord.Embed(
-            title=player["Name"], color=0x11806A, url=tools.player_url(query[0])
+            title=player["Name"],
+            color=0x11806A,
+            url=f"https://cultris.net/index.html?player={query[0]['UserId']}",
         )
         embed.add_field(name="Rank", value=player["Rank"], inline=True)
         embed.add_field(name="Score", value=f"{player['Score']:.1f}", inline=True)
@@ -86,7 +91,7 @@ class Lookup(commands.Cog):
             embed=discord.Embed(
                 title="Rankings",
                 color=0x11806A,
-                url=f"https://gewaltig.net/stats.aspx?sort=rank&page={page}",
+                url=f"https://cultris.net/tables.html?table=FFA",
                 description=description,
             )
         )
@@ -116,7 +121,7 @@ class Lookup(commands.Cog):
             embed=discord.Embed(
                 title="Most Active Players (last 7d)",
                 color=0x11806A,
-                url="https://gewaltig.net/",
+                url="https://cultris.net/tables.html?table=Activity",
                 description=description,
             )
         )
@@ -154,7 +159,7 @@ class Lookup(commands.Cog):
             embed=discord.Embed(
                 title=title,
                 color=0x11806A,
-                url="https://gewaltig.net/",
+                url="https://cultris.net/tables.html?table=Netscores",
                 description=description,
             )
         )
