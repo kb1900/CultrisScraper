@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import time
 from progressbar import progressbar
+from itertools import groupby
 
 
 def create_connection(db_file):
@@ -74,6 +75,48 @@ def select_player_by_id(conn, userID):
     stats = to_dict(rows)
 
     return stats
+
+
+def select_daily_stats_by_id_py(conn, userID):
+    """
+    Query SQL DB by userID and return a list of rows as dicts, then parse
+    """
+    player = None
+    c = conn.cursor()
+    c.execute("SELECT * FROM stats WHERE userID = ?", (str(userID),))
+
+    rows = c.fetchall()  # list of tuples
+    stats = to_dict(rows)
+
+    stats.sort(
+        key=lambda x: datetime.strptime(x["timestamp"], "%d/%m/%Y %H:%M")
+    )  # sort by timestamp
+
+    df = pd.DataFrame(stats)
+    df["date"] = df["timestamp"]
+    df["date"] = df["date"].apply(
+        lambda x: datetime.strptime(x, "%d/%m/%Y %H:%M").strftime("%D")
+    )
+    output = []
+    for idx, day in df.groupby(df.date):
+        entry = {}
+        entry["date"] = day["date"].iloc[0]
+        entry["userID"] = int(day["userID"].iloc[0])
+        entry["name"] = day["name"].iloc[0]
+        entry["timestamp"] = day["timestamp"].iloc[0]
+        entry["rank"] = int(int(day["rank"].min()))
+        entry["avgbpm"] = int(day["avgbpm"].iloc[0])
+        entry["maxbpm"] = int(day["maxbpm"].iloc[0])
+        entry["maxcombo"] = int(day["maxcombo"].iloc[-1])
+        entry["playedrounds"] = int(day["playedrounds"].iloc[-1])
+        entry["playedmin"] = int(day["playedmin"].iloc[-1])
+        entry["score"] = float(day["score"].iloc[-1])
+        entry["wins"] = int(day["wins"].iloc[-1])
+        entry["WeekPlaytime"] = float(day["WeekPlaytime"].iloc[-1])
+        entry["netscore"] = float(day["netscore"].iloc[-1])
+        output.append(entry)
+
+    return output
 
 
 def select_player_by_name(conn, username):
@@ -242,7 +285,7 @@ def select_daily_stats_by_id(id, conn):
 
 
 if __name__ == "__main__":
-    update_DB(create_connection("playerDB.db"))
+    # update_DB(create_connection("playerDB.db"))
     # active = calculate_active(conn)[0:20]
     # for i in active:
     #     print(i)
@@ -254,8 +297,8 @@ if __name__ == "__main__":
     # print(calculate_week_playtime(select_player_by_name(conn, "Shay")))
     # print(calculate_month_winrate(select_player_by_name(conn, "Shay")))
     # print(calcualte_week_net_score(select_player_by_name(conn, "Azteca")))
-    # data = select_daily_stats_by_id(17218, create_connection("playerDB.db"))
-
+    # print(select_daily_stats_by_id(17218, create_connection("playerDB.db")))
+    # select_daily_stats_by_id_py(create_connection("playerDB.db"), 17218)
     while True:
         now = datetime.now()
         print("It is:", now.strftime("%d/%m/%Y %H:%M"))
@@ -263,7 +306,8 @@ if __name__ == "__main__":
             now.minute % 10 == 0
         ):  # pulling q10 minutes, update_DB takes 8-10 minutes now with filtering of rank < 1000
             print(
-                "Updating Player_Dump and playerDB.db", now.strftime("%d/%m/%Y %H:%M")
+                "Updating Player_Dump and playerDB.db",
+                now.strftime("%d/%m/%Y %H:%M"),
             )
             try:
                 update_DB(create_connection("playerDB.db"))

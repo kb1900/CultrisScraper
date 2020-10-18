@@ -8,19 +8,13 @@ def create_app():
     app = Flask(__name__)
 
     @app.route("/")
-    def index():
-        return "Hello World!"
-
-    return app
-
-    @app.route("/")
     def hello_world():
         return "Nothing to see here m8"
 
     @app.route("/daily_stats_by_id/<userid>")
-    def daily_stats_by_id(userid):
-        user = database.select_daily_stats_by_id(
-            userid, database.create_connection("playerDB.db")
+    def daily_stats_by_id_py(userid):
+        user = database.select_daily_stats_by_id_py(
+            database.create_connection("playerDB.db"), userid
         )
         return json.dumps(user)
 
@@ -101,6 +95,8 @@ def create_app():
         if not player_dict:
             player_dict = tools.player_stats_by_name_fuzzy(username, df)
         return json.dumps(player_dict)
+
+    return app
 
 
 if __name__ == "__main__":
