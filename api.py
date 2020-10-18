@@ -96,6 +96,7 @@ def create_app():
             player_dict = tools.player_stats_by_name_fuzzy(username, df)
         return json.dumps(player_dict)
 
+    CORS(app)
     return app
 
 

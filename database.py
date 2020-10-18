@@ -92,7 +92,7 @@ def select_daily_stats_by_id_py(conn, userID):
         key=lambda x: datetime.strptime(x["timestamp"], "%d/%m/%Y %H:%M")
     )  # sort by timestamp
 
-    df = pd.DataFrame(stats)
+    df = pd.DataFrame(stats).dropna()
     df["date"] = df["timestamp"]
     df["date"] = df["date"].apply(
         lambda x: datetime.strptime(x, "%d/%m/%Y %H:%M").strftime("%D")
